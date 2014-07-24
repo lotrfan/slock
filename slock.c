@@ -23,6 +23,20 @@
 #include <bsd_auth.h>
 #endif
 
+#define CLEANMASK(mask)         (mask & (ShiftMask|ControlMask|Mod1Mask|Mod2Mask|Mod3Mask|Mod4Mask|Mod5Mask))
+typedef union {
+	int i;
+	unsigned int ui;
+	float f;
+	const void *v;
+} Arg;
+typedef struct {
+	unsigned int mod;
+	KeySym keysym;
+	void (*func)(const Arg *);
+	const Arg arg;
+} Key;
+
 typedef struct {
 	int screen;
 	Window root, win;
@@ -33,6 +47,9 @@ typedef struct {
 static Lock **locks;
 static int nscreens;
 static Bool running = True;
+static void spawn(const Arg *arg);
+
+#include "config.h"
 
 static void
 die(const char *errstr, ...) {
@@ -84,6 +101,7 @@ readpw(Display *dpy, const char *pws)
 	char buf[32], passwd[256];
 	int num, screen;
 	unsigned int len, llen;
+	unsigned int i;
 	KeySym ksym;
 	XEvent ev;
 
@@ -98,6 +116,14 @@ readpw(Display *dpy, const char *pws)
 		if(ev.type == KeyPress) {
 			buf[0] = 0;
 			num = XLookupString(&ev.xkey, buf, sizeof buf, &ksym, 0);
+			for(i = 0; i < sizeof(keys) / sizeof(keys[0]); i++) {
+				if(ksym == keys[i].keysym
+						/*&& CLEANMASK(keys[i].mod) == CLEANMASK(ev.xkey.state)*/
+						&& keys[i].func) {
+					keys[i].func(&(keys[i].arg));
+					continue;
+				}
+			}
 			if(IsKeypadKey(ksym)) {
 				if(ksym == XK_KP_Enter)
 					ksym = XK_Return;
@@ -287,4 +313,16 @@ main(int argc, char **argv) {
 	XCloseDisplay(dpy);
 
 	return 0;
+}
+
+/* From DWM */
+static void
+spawn(const Arg *arg) {
+	if(fork() == 0) {
+		setsid();
+		execvp(((char **)arg->v)[0], (char **)arg->v);
+		fprintf(stderr, "slock: execvp %s", ((char **)arg->v)[0]);
+		perror(" failed");
+		exit(EXIT_SUCCESS);
+	}
 }
