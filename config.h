@@ -1,6 +1,6 @@
-static const char *volupcmd[]           = { "/home/jeffrey/bin/vol_up", NULL };
-static const char *voldowncmd[]         = { "/home/jeffrey/bin/vol_down", NULL };
-static const char *volmutecmd[]         = { "/home/jeffrey/bin/mute_toggle", NULL };
+static const char *volupcmd[]           = { "/home/jeffrey/bin/volctl", "+", NULL };
+static const char *voldowncmd[]         = { "/home/jeffrey/bin/volctl", "-", NULL };
+static const char *volmutecmd[]         = { "/home/jeffrey/bin/volctl", "t", NULL };
 
 static const char *music_playpausecmd[] = { "/home/jeffrey/bin/music", "play_pause", NULL };
 static const char *music_nextcmd[]      = { "/home/jeffrey/bin/music", "next", NULL };
