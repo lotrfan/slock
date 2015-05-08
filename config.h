@@ -21,3 +21,9 @@ static Key keys[] = {
 	{ Mod4Mask,                               XK_Down,         spawn,          {.v = brightnessdowncmd } },
 	{ Mod4Mask,                               XK_Up,           spawn,          {.v = brightnessupcmd } },
 };
+
+static const char *colorname[NUMCOLS] = {
+	"black",     /* after initialization */
+	"#005577",   /* during input */
+	"#CC3333",   /* failed/cleared the input */
+};
